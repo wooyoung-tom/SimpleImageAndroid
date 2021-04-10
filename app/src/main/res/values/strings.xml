@@ -1,3 +1,4 @@
 <resources>
+    <string name="kakao_rest_key">KakaoAK 104a6d4a4c8b35ff6eeec02cc1148cde</string>
     <string name="app_name">SimpleImageListing</string>
 </resources>
