@@ -37,7 +37,7 @@ class ImageListingFragment : Fragment() {
 
         initAdapter()
 
-        observeImageList()
+        setSearchViewWatcher()
     }
 
     private fun initAdapter() {
@@ -49,12 +49,45 @@ class ImageListingFragment : Fragment() {
         }
     }
 
-    private fun observeImageList() {
-        viewModel.findImage(getString(R.string.kakao_rest_key), "아이유")
-            .observe(viewLifecycleOwner) {
-                it?.let {
-                    imageListingAdapter.submitList(it)
+    private fun setSearchViewWatcher() {
+        val textListener = object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (query.isNullOrBlank()) {
+                    binding.textViewImage.visibility = View.VISIBLE
+                    binding.recyclerviewImage.visibility = View.GONE
+                } else {
+                    viewModel.findImage(getString(R.string.kakao_rest_key), query)
+                        .observe(viewLifecycleOwner) {
+                            binding.textViewImage.visibility = View.GONE
+                            binding.recyclerviewImage.visibility = View.VISIBLE
+
+                            it?.let {
+                                imageListingAdapter.submitList(it)
+                            }
+                        }
                 }
+                return true
             }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrBlank()) {
+                    binding.textViewImage.visibility = View.VISIBLE
+                    binding.recyclerviewImage.visibility = View.GONE
+                } else {
+                    viewModel.findImage(getString(R.string.kakao_rest_key), newText)
+                        .observe(viewLifecycleOwner) {
+                            binding.textViewImage.visibility = View.GONE
+                            binding.recyclerviewImage.visibility = View.VISIBLE
+
+                            it?.let {
+                                imageListingAdapter.submitList(it)
+                            }
+                        }
+                }
+                return true
+            }
+        }
+        binding.searchViewImage.isSubmitButtonEnabled = true
+        binding.searchViewImage.setOnQueryTextListener(textListener)
     }
 }
