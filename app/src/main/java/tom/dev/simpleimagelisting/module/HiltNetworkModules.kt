@@ -5,10 +5,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import tom.dev.simpleimagelisting.model.ImageRetrofitService
+import tom.dev.simpleimagelisting.BuildConfig
+import tom.dev.simpleimagelisting.model.retrofit.ImageRetrofitService
 import javax.inject.Singleton
 
 /**
@@ -20,6 +22,16 @@ object HiltNetworkModules {
 
     // Kakao API base url
     private const val BASE_URL = "https://dapi.kakao.com"
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient() = if (BuildConfig.DEBUG) {
+        OkHttpClient.Builder().addInterceptor(
+            HttpLoggingInterceptor().apply {
+                setLevel(HttpLoggingInterceptor.Level.BODY)
+            }
+        ).build()
+    } else OkHttpClient.Builder().build()
 
     // Retrofit Build
     @Provides

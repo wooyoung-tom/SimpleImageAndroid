@@ -1,4 +1,4 @@
-package tom.dev.simpleimagelisting.model
+package tom.dev.simpleimagelisting.model.retrofit
 
 import io.reactivex.Single
 import retrofit2.http.GET
