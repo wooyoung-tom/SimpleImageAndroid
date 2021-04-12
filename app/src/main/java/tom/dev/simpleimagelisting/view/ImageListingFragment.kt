@@ -8,12 +8,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tom.dev.simpleimagelisting.R
 import tom.dev.simpleimagelisting.databinding.FragmentImageListingBinding
+import tom.dev.simpleimagelisting.model.dto.ImageResponseDocument
 import tom.dev.simpleimagelisting.viewmodel.ImageListingViewModel
 
 @AndroidEntryPoint
@@ -58,6 +61,7 @@ class ImageListingFragment : Fragment() {
                 if (query.isNullOrBlank()) {
                     binding.textViewImage.visibility = View.VISIBLE
                     binding.recyclerviewImage.visibility = View.GONE
+                    binding.chipGroupImage.removeAllViews()
                 } else {
                     viewModel.findImage(getString(R.string.kakao_rest_key), query)
                 }
@@ -68,6 +72,7 @@ class ImageListingFragment : Fragment() {
                 if (newText.isNullOrBlank()) {
                     binding.textViewImage.visibility = View.VISIBLE
                     binding.recyclerviewImage.visibility = View.GONE
+                    binding.chipGroupImage.removeAllViews()
                 } else {
                     viewModel.findImage(getString(R.string.kakao_rest_key), newText)
                 }
@@ -83,13 +88,43 @@ class ImageListingFragment : Fragment() {
         viewModel.imageSearchResultLiveData.observe(viewLifecycleOwner) {
             binding.textViewImage.visibility = View.GONE
             binding.recyclerviewImage.visibility = View.VISIBLE
+
+            binding.chipGroupImage.removeAllViews()
+
             it?.let {
                 imageListingAdapter.submitList(it)
             }
+
+            parseCollections(it)
         }
 
         viewModel.imageSearchFailedLiveData.observe(viewLifecycleOwner) {
             Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun parseCollections(list: List<ImageResponseDocument>) {
+        val collectionList = list.groupBy { it.collection }.keys.toMutableList()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            // all 필터링 하나 제일 앞에 추가한다.
+            collectionList.add(0, "all")
+
+            setChipView(collectionList)
+
+            // Chip Setting 후에 collectionList clear 해준다.
+            collectionList.clear()
+        }
+    }
+
+    private suspend fun setChipView(list: List<String>) {
+        list.forEachIndexed { index, collection ->
+            val chip = Chip(requireContext()).apply {
+                id = index
+                text = collection
+            }
+
+            binding.chipGroupImage.addView(chip)
         }
     }
 

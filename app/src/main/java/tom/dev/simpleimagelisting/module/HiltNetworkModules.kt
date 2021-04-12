@@ -27,7 +27,7 @@ object HiltNetworkModules {
     fun provideOkHttpClient() = if (BuildConfig.DEBUG) {
         OkHttpClient.Builder().addInterceptor(
             HttpLoggingInterceptor().apply {
-                setLevel(HttpLoggingInterceptor.Level.BODY)
+                setLevel(HttpLoggingInterceptor.Level.BASIC)
             }
         ).build()
     } else OkHttpClient.Builder().build()
