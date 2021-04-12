@@ -1,15 +1,14 @@
 package tom.dev.simpleimagelisting.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.paging.PagedList
-import androidx.paging.toLiveData
-import androidx.paging.toObservable
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import tom.dev.simpleimagelisting.model.datasource.ImageDataSourceFactory
+import kotlinx.coroutines.launch
 import tom.dev.simpleimagelisting.model.dto.ImageResponseDocument
+import tom.dev.simpleimagelisting.model.dto.NetworkResult
 import tom.dev.simpleimagelisting.model.retrofit.ImageRetrofitService
 import javax.inject.Inject
 
@@ -20,17 +19,30 @@ constructor(
     private val imageRetrofitService: ImageRetrofitService
 ) : ViewModel() {
 
-    private val compositeDisposable = CompositeDisposable()
+    private val _imageSearchResultLiveData: MutableLiveData<List<ImageResponseDocument>> = MutableLiveData()
+    val imageSearchResultLiveData: LiveData<List<ImageResponseDocument>> get() = _imageSearchResultLiveData
 
-    override fun onCleared() {
-        super.onCleared()
-        compositeDisposable.clear()
-    }
+    private val _imageSearchFailedLiveData: MutableLiveData<String> = MutableLiveData()
+    val imageSearchFailedLiveData: LiveData<String> get() = _imageSearchFailedLiveData
 
-    fun findImage(key: String, query: String): LiveData<PagedList<ImageResponseDocument>> {
-        val imageDataSourceFactory =
-            ImageDataSourceFactory(key, query, compositeDisposable, imageRetrofitService)
+    fun findImage(key: String, query: String) {
+        viewModelScope.launch {
+            val result = try {
+                val body = imageRetrofitService.findImages(key, query)
 
-        return imageDataSourceFactory.toLiveData(80)
+                NetworkResult.OK(body)
+            } catch (e: Exception) {
+                NetworkResult.Error(e)
+            }
+
+            when (result) {
+                is NetworkResult.OK -> {
+                    _imageSearchResultLiveData.postValue(result.data.documents)
+                }
+                is NetworkResult.Error -> {
+                    _imageSearchFailedLiveData.postValue(result.e.message)
+                }
+            }
+        }
     }
 }
