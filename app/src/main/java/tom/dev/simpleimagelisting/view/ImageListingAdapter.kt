@@ -21,7 +21,6 @@ class ImageListingAdapter : ListAdapter<ImageResponseDocument, ImageListingViewH
         ): Boolean {
             return oldItem == newItem
         }
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageListingViewHolder {
