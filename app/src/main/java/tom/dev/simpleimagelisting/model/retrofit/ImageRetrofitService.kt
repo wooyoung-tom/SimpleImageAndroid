@@ -6,7 +6,6 @@ import retrofit2.http.Query
 import tom.dev.simpleimagelisting.model.dto.ImageResponseDTO
 
 interface ImageRetrofitService {
-
     @GET("/v2/search/image")
     suspend fun findImages(
         @Header("Authorization") key: String,
