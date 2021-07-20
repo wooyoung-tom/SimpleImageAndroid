@@ -26,4 +26,6 @@ class MainActivity : AppCompatActivity() {
             .add(R.id.fragment_container, ImageListingFragment.newInstance())
             .commitNow()
     }
+
+    // this is blank comment
 }
