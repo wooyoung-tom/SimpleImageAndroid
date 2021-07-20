@@ -27,5 +27,5 @@ class MainActivity : AppCompatActivity() {
             .commitNow()
     }
 
-    // this is blank comment
+    // jenkins test
 }
