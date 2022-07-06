@@ -7,7 +7,7 @@ jobs:
   debug-build:
     executor:
       name: android/android-docker
-      tag: 2022.06
+      tag: '2022.06'
 
     steps:
       # Checkout the code as the first step.
