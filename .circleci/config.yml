@@ -1,0 +1,25 @@
+version: 2.1
+
+orbs:
+  android: circleci/android@2.1.2
+
+jobs:
+  debug-build:
+    executor:
+      name: android/android-docker
+      tag: 2022-07-06
+
+    steps:
+      # Checkout the code as the first step.
+      - checkout
+
+      # And finally run the debug build
+      - run:
+          name: Assemble debug build
+          command:
+            ./gradlew assembleDebug
+
+workflows:
+  staging:
+    jobs:
+      - debug-build
